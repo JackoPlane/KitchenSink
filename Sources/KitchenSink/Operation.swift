@@ -27,7 +27,10 @@ import Foundation
 /// Operation interface
 public protocol OperationInterface {
 
+    ///  Type of expected input
     associatedtype Input
+
+    /// Type of output data
     associatedtype Output
 
     // MARK: - Properties
@@ -40,5 +43,46 @@ public protocol OperationInterface {
 
     /// Operation description, Markdown supported
     var description: String { get }
+
+    // MARK: - Functions
+
+    /// Operation execution
+    /// - Parameter input: Input data
+    /// - Returns: Processed output
+    func execute(input: Input) async throws -> Output
+
+}
+
+/// Operation
+open class Operation<Input, Output>: OperationInterface {
+
+    // MARK: - Properties
+
+    public let name: String
+    public let infoUrl: URL?
+    public let description: String
+
+    /// Disabled status
+    internal var disabled: Bool = false
+
+    /// Flow control
+    internal var flowControl: Bool = false
+
+    /// Breakpoint
+    internal var breakpoint: Bool = false
+
+    // MARK: - Initializer
+
+    internal init(name: String, description: String, infoUrl: URL? = nil) {
+        self.name = name
+        self.description = description
+        self.infoUrl = infoUrl
+    }
+
+    // MARK: - Execution
+
+    open func execute(input: Input) async throws -> Output {
+        fatalError("Subclass must override: \(#function)", file: #file, line: #line)
+    }
 
 }

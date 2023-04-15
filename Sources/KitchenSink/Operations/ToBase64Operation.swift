@@ -1,6 +1,6 @@
 //
-//  KitchenSinkTests.swift
-//
+//  ToBase64Operation.swift
+//  
 //  Copyright (c) 2023 Jack Perry <github@jckpry.me>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,3 +21,26 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //
+
+import Foundation
+
+/// To Base64 operation
+final public class ToBase64Operation: Operation<Data, String> {
+
+    // MARK: - Initializer
+
+    convenience init() {
+        self.init(
+            name: "To Base64",
+            description: "Base64 is a notation for encoding arbitrary byte data using a restricted set of symbols that can be conveniently used by humans and processed by computers.\n\nThis operation encodes raw data into an ASCII Base64 string.\n\ne.g. `hello` becomes `aGVsbG8=`", // swiftlint:disable:this line_length
+            infoUrl: URL(string: "https://wikipedia.org/wiki/Base64")
+        )
+    }
+
+    // MARK: - Execution
+
+    public override func execute(input: Data) async throws -> String {
+        input.base64EncodedString()
+    }
+
+}

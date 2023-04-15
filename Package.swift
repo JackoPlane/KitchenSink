@@ -28,7 +28,7 @@ import PackageDescription
 let package = Package(
 	name: "KitchenSink",
 	platforms: [
-		.macOS(.v10_13),
+        .macOS(.v13),
 		.iOS(.v16),
 		.tvOS(.v16),
 		.watchOS(.v6),
