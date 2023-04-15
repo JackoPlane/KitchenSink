@@ -125,8 +125,9 @@ final class RecipeTests: XCTestCase {
     func testExecuteInvalidStartIndex() async {
         do {
             // WHEN we execute with a invalid starting index
-            _ = try await testSubject.execute(dish: String(), startFrom: .max)
-            XCTFail("Error should have been thrown")
+            let startIndex = testSubject.operations.count + 1
+            _ = try await testSubject.execute(dish: String(), startFrom: startIndex)
+            XCTFail("Recipe.Error.invalidStartIndex should have been thrown")
         } catch {
             // THEN Confirm the error thrown is `Recipe.Error.invalidStartIndex`
             XCTAssertEqual(error as? Recipe.Error, .invalidStartIndex)

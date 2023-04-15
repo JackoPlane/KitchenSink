@@ -23,7 +23,6 @@
 //
 
 import os.log
-import Foundation
 
 /// The `Recipe` controls a list of `Operation`s and the `Dish` they operate on.
 public final class Recipe {
