@@ -37,7 +37,7 @@ let package = Package(
 		.library(name: "KitchenSink", targets: ["KitchenSink"]),
 	],
 	dependencies: [
-        .package(url: "git@github.com:realm/SwiftLint.git", from: "0.51.0"),
+        .package(url: "https://github.com/realm/SwiftLint.git", from: "0.51.0"),
 	],
     targets: [
 		.target(
