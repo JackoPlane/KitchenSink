@@ -23,7 +23,6 @@
 //
 
 import XCTest
-import Foundation
 @testable import KitchenSink
 
 final class RecipeTests: XCTestCase {
