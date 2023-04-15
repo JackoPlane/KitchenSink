@@ -26,13 +26,9 @@ jobs:
         uses: actions/checkout@v3
       - name: Build All DocC 🛠
         run: |
-          xcodebuild docbuild -scheme KitchenSink -derivedDataPath /tmp/docbuild -destination 'generic/platform=iOS';
-          $(xcrun --find docc) process-archive \
-            transform-for-static-hosting /tmp/docbuild/Build/Products/Debug-iphoneos/KitchenSink.doccarchive \
-            --output-path docs \
-            --hosting-base-path KitchenSink;
-          echo "<script>window.location.href += \"/documentation/KitchenSink\"</script>" > docs/index.html;
-
+          xcodebuild docbuild -scheme KitchenSink -derivedDataPath .build/docbuild -destination 'generic/platform=iOS';
+          $(xcrun --find docc) process-archive transform-for-static-hosting .build/docbuild/Build/Products/Debug-iphoneos/KitchenSink.doccarchive --hosting-base-path KitchenSink --output-path docs;
+          echo "<script>window.location.href += \"/documentation/kitchensink\"</script>" > docs/index.html;
       - name: Upload artifact 📜
         uses: actions/upload-pages-artifact@v1
         with:
