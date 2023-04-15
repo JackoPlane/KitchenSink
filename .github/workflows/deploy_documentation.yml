@@ -24,9 +24,9 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
-      - name: Build All DocC 🛠
+      - name: Build DocC 🛠
         run: |
-          xcodebuild docbuild -scheme KitchenSink -derivedDataPath .build/docbuild -destination 'generic/platform=iOS';
+          xcodebuild docbuild -scheme KitchenSink -derivedDataPath .build/docbuild -destination 'generic/platform=iOS' -skipPackagePluginValidation;
           $(xcrun --find docc) process-archive transform-for-static-hosting .build/docbuild/Build/Products/Debug-iphoneos/KitchenSink.doccarchive --hosting-base-path KitchenSink --output-path docs;
           echo "<script>window.location.href += \"/documentation/kitchensink\"</script>" > docs/index.html;
       - name: Upload artifact 📜
