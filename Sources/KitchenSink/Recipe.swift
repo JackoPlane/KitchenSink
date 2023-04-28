@@ -23,6 +23,7 @@
 //
 
 import os.log
+import Foundation
 
 /// The `Recipe` controls a list of `Operation`s and the `Dish` they operate on.
 public final class Recipe {
@@ -30,40 +31,45 @@ public final class Recipe {
     // MARK: - Errors
 
     public enum Error: Swift.Error {
+        case invalidInput
         case invalidStartIndex
     }
 
-
     // MARK: - Properties
 
-    private let logger: Logger
+    /// Operations for this `Recipe`
+    public private(set) var operations: [Operation]
 
-    /// Array of `Operation`
-    public private(set) var operations: [Operation<Any, Any>]
+    /// Lock to guard `Recipe.operations`
+    private let operationsAccessLock = UnfairLock()
 
-    private var lastExecuted: Operation<Any, Any>? = nil
+    /// Last executed operation
+    internal var lastExecuted: Operation?
 
     // MARK: - Initialisation
 
     /// Initialise a new `Recipe` with an array of operations
     /// - Parameter operations: Array of initial operations
-    public init(_ operations: [Operation<Any, Any>], logger: Logger? = nil) {
+    public init(_ operations: [Operation]) {
         self.operations = operations
-        self.logger = logger ?? .recipeLogger
     }
 
     // MARK: - Operations
 
     /// Adds a new `Operation` to this `Recipe`.
     /// - Parameter operation: The operation
-    public func addOperation(_ operation: Operation<Any, Any>) {
-        self.operations.append(operation)
+    public func addOperation(_ operation: Operation) {
+        operationsAccessLock.withLock {
+            self.operations.append(operation)
+        }
     }
 
     /// Adds a new Operation to this Recipe.
     /// - Parameter operations: Operations
-    public func addOperations(_ operations: [Operation<Any, Any>]) {
-        self.operations.append(contentsOf: operations)
+    public func addOperations(_ operations: [Operation]) {
+        operationsAccessLock.withLock {
+            self.operations.append(contentsOf: operations)
+        }
     }
 
     // MARK: - Breakpoints
@@ -73,8 +79,10 @@ public final class Recipe {
     ///   - index: The index of the `Operation`
     ///   - enabled: Should the breakpoint be enabled
     public func setBreakpoint(_ index: Int, enabled: Bool) {
-        guard let operation = self.operations[optional: index] else { return }
-        operation.breakpoint = enabled
+        operationsAccessLock.withLock {
+            guard index >= self.operations.startIndex, index < self.operations.endIndex else { return }
+            self.operations[index].breakpoint = enabled
+        }
     }
 
     /// Remove breakpoints on all `Operation` in the `Recipe` up to the specified position. Used by Flow
@@ -82,8 +90,12 @@ public final class Recipe {
     ///
     /// - Parameter index: position
     public func removeBreakpoints(upTo index: Int) {
-        self.operations.prefix(index).forEach {
-            $0.breakpoint = false
+        operationsAccessLock.withLock {
+            let operations = self.operations
+            operations.prefix(index).forEach {
+                $0.breakpoint = false
+            }
+            self.operations = operations
         }
     }
 
@@ -94,36 +106,57 @@ public final class Recipe {
     ///   - dish: The dish to operate upon
     ///   - startFrom: The index of the `Operation` to start executing from
     /// - Returns: The final progress through the `Recipe`.
-    public func execute(dish: Any, startFrom: Int = 0) async throws -> Int {
-        guard startFrom < operations.count else {
-            throw Error.invalidStartIndex
-        }
-
+    public func execute(dish: inout Dish, startFrom: Int = 0) async throws -> Int {
         if startFrom == 0 {
             self.lastExecuted = nil
         }
 
-        logger.debug("[*] Executing recipe of \(self.operations.count) operations, starting at index \(startFrom).")
+        // Thread-safe access to operations array
+        let operations = operationsAccessLock.withLock { self.operations }
 
-        for (index, operation) in self.operations.dropFirst(startFrom).enumerated() {
-            logger.debug("[\(index)] \(operation.name)")
+        // Validate starting index
+        guard operations.count > startFrom else {
+            throw Recipe.Error.invalidStartIndex
+        }
+
+        print("[*] Executing recipe of \(operations.count) operations, starting at index \(startFrom).")
+        for (index, operation) in operations.dropFirst(startFrom).enumerated() {
+            print("[\(index)] \(operation.name)")
+
+            // Ensure we have an input value
+            guard let dishValue = dish.get() else {
+                print("Failed to get dish value")
+                throw Recipe.Error.invalidInput
+            }
 
             // Skip if disabled
             guard operation.disabled == false else {
-                logger.debug("Operation is disabled, skipping..")
+                print("Operation is disabled, skipping..")
                 continue
             }
 
             // Return this index if the operation is breakpointed
             guard operation.breakpoint == false else {
-                logger.debug("Pausing at breakpoint")
+                print("Pausing at breakpoint")
                 return index
             }
 
-            // TODO: Execute the operation
+            do {
+                print("Executing operation '\(operation.name)'.")
+                if operation.flowControl {
+
+                } else {
+                    let operationResult = try await operation.execute(input: dishValue).asData()
+                    dish.set(operationResult)
+                }
+
+                self.lastExecuted = operation
+            } catch {
+
+            }
         }
 
-        logger.debug("Recipe complete")
+        print("Recipe complete")
         return operations.count
     }
 

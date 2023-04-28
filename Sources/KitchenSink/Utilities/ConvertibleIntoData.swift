@@ -1,6 +1,5 @@
-// swift-tools-version:5.7
 //
-//  Package.swift
+//  ConvertibleIntoData.swift
 //
 //  Copyright (c) 2023 Jack Perry <github@jckpry.me>
 //
@@ -23,30 +22,33 @@
 //  THE SOFTWARE.
 //
 
-import PackageDescription
+import Foundation
 
-let package = Package(
-	name: "KitchenSink",
-	platforms: [
-        .macOS(.v13),
-		.iOS(.v16),
-		.tvOS(.v16),
-		.watchOS(.v8),
-	],
-	products: [
-		.library(name: "KitchenSink", targets: ["KitchenSink"]),
-	],
-	dependencies: [
-        .package(url: "https://github.com/realm/SwiftLint.git", from: "0.51.0"),
-	],
-    targets: [
-		.target(
-            name: "KitchenSink",
-            dependencies: [],
-            plugins: [
-                .plugin(name: "SwiftLintPlugin", package: "SwiftLint")
-            ]
-        ),
-		.testTarget(name: "KitchenSinkTests", dependencies: ["KitchenSink"])
-	]
-)
+public enum DataConvertibleError: Error {
+    case stringFailedToConvert
+}
+
+/// Convertible info `Data`
+public protocol ConvertibleIntoData {
+    func asData() throws -> Data
+}
+
+extension Data: ConvertibleIntoData {
+
+    public func asData() throws -> Data {
+        self
+    }
+
+}
+
+extension String: ConvertibleIntoData {
+
+    public func asData() throws -> Data {
+        guard let result = self.data(using: .utf8) else {
+            throw DataConvertibleError.stringFailedToConvert
+        }
+
+        return result
+    }
+
+}

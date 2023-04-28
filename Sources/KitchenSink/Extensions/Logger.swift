@@ -1,6 +1,5 @@
-// swift-tools-version:5.7
 //
-//  Package.swift
+//  Logger.swift
 //
 //  Copyright (c) 2023 Jack Perry <github@jckpry.me>
 //
@@ -23,30 +22,12 @@
 //  THE SOFTWARE.
 //
 
-import PackageDescription
+import os.log
+import Foundation
 
-let package = Package(
-	name: "KitchenSink",
-	platforms: [
-        .macOS(.v13),
-		.iOS(.v16),
-		.tvOS(.v16),
-		.watchOS(.v8),
-	],
-	products: [
-		.library(name: "KitchenSink", targets: ["KitchenSink"]),
-	],
-	dependencies: [
-        .package(url: "https://github.com/realm/SwiftLint.git", from: "0.51.0"),
-	],
-    targets: [
-		.target(
-            name: "KitchenSink",
-            dependencies: [],
-            plugins: [
-                .plugin(name: "SwiftLintPlugin", package: "SwiftLint")
-            ]
-        ),
-		.testTarget(name: "KitchenSinkTests", dependencies: ["KitchenSink"])
-	]
-)
+internal extension Logger {
+
+    static let disabled = Logger(.disabled)
+    static let `default` = Logger(.default)
+
+}

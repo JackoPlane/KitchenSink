@@ -1,6 +1,5 @@
-// swift-tools-version:5.7
 //
-//  Package.swift
+//  Dish.swift
 //
 //  Copyright (c) 2023 Jack Perry <github@jckpry.me>
 //
@@ -23,30 +22,52 @@
 //  THE SOFTWARE.
 //
 
-import PackageDescription
+import os.log
+import Foundation
 
-let package = Package(
-	name: "KitchenSink",
-	platforms: [
-        .macOS(.v13),
-		.iOS(.v16),
-		.tvOS(.v16),
-		.watchOS(.v8),
-	],
-	products: [
-		.library(name: "KitchenSink", targets: ["KitchenSink"]),
-	],
-	dependencies: [
-        .package(url: "https://github.com/realm/SwiftLint.git", from: "0.51.0"),
-	],
-    targets: [
-		.target(
-            name: "KitchenSink",
-            dependencies: [],
-            plugins: [
-                .plugin(name: "SwiftLintPlugin", package: "SwiftLint")
-            ]
-        ),
-		.testTarget(name: "KitchenSinkTests", dependencies: ["KitchenSink"])
-	]
-)
+/// The data being operated on by each operation.
+
+public struct Dish {
+
+    // MARK: - Properties
+
+    private let logger: Logger
+    private let signposter: OSSignposter
+
+    private let accessLock = UnfairLock()
+    private var value: Data?
+
+    // MARK: - Initialisation
+
+    public init(value: Data? = nil) {
+        self.init(value: value, signposter: nil)
+    }
+
+    internal init(value: Data?, logger: Logger = .default, signposter: OSSignposter? = nil) {
+        self.value = value
+        self.logger = logger
+        self.signposter = signposter ?? OSSignposter(logger: logger)
+    }
+
+    // MARK: - Getters / Setters
+
+    public func get() -> Data? {
+        accessLock.withLock {
+            self.value
+        }
+    }
+
+    public mutating func set(_ value: Data) {
+        signposter.emitEvent("SetDishValue", "value=\(value)")
+        accessLock.withLock {
+            self.value = value
+        }
+    }
+
+    // MARK: - Cloning
+
+    internal func clone() -> Dish {
+        Dish(value: self.value)
+    }
+
+}

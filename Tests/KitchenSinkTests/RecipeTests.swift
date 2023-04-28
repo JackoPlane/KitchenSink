@@ -44,7 +44,7 @@ final class RecipeTests: XCTestCase {
         XCTAssertTrue(testSubject.operations.isEmpty)
 
         // WHEN we append a example operation
-        testSubject.addOperation(Operation<String, String>(name: "Test", description: "Testing"))
+        testSubject.addOperation(.mock())
 
         // THEN we have 1 operation stored in the recipe
         XCTAssertEqual(testSubject.operations.count, 1)
@@ -56,10 +56,10 @@ final class RecipeTests: XCTestCase {
 
         // WHEN we append multiple operations
         testSubject.addOperations([
-            Operation<String, String>(name: "Test", description: "Testing"),
-            Operation<String, String>(name: "Test", description: "Testing"),
-            Operation<String, String>(name: "Test", description: "Testing"),
-            Operation<String, String>(name: "Test", description: "Testing"),
+            .mock(),
+            .mock(),
+            .mock(),
+            .mock(),
         ])
 
         // THEN expect 4 operations contained within the array
@@ -74,7 +74,7 @@ final class RecipeTests: XCTestCase {
 
     func testBreakpointToggling() {
         // GIVEN we append a operation to our recipe
-        testSubject.addOperation(Operation<String, String>(name: "Test", description: "Testing"))
+        testSubject.addOperation(.mock())
 
         // THEN expect the breakpoint is disabled by default
         XCTAssertEqual(testSubject.operations.first?.breakpoint, false)
@@ -95,10 +95,10 @@ final class RecipeTests: XCTestCase {
     func testRemoveBreakpoints() {
         // GIVEN we append some operations to our recipe
         testSubject.addOperations([
-            Operation<String, String>(name: "Test", description: "Testing"),
-            Operation<String, String>(name: "Test", description: "Testing"),
-            Operation<String, String>(name: "Test", description: "Testing"),
-            Operation<String, String>(name: "Test", description: "Testing"),
+            .mock(),
+            .mock(),
+            .mock(),
+            .mock(),
         ])
 
         // THEN expect only default values for breakpoint state
@@ -124,8 +124,9 @@ final class RecipeTests: XCTestCase {
     func testExecuteInvalidStartIndex() async {
         do {
             // WHEN we execute with a invalid starting index
+            var dish = Dish()
             let startIndex = testSubject.operations.count + 1
-            _ = try await testSubject.execute(dish: String(), startFrom: startIndex)
+            _ = try await testSubject.execute(dish: &dish, startFrom: startIndex)
             XCTFail("Recipe.Error.invalidStartIndex should have been thrown")
         } catch {
             // THEN Confirm the error thrown is `Recipe.Error.invalidStartIndex`

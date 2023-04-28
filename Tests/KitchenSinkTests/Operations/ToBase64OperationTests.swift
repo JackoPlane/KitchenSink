@@ -49,7 +49,8 @@ final class ToBase64OperationTests: XCTestCase {
     func testBasicOperations() async throws {
         let testInput1 = "Hello World!".data(using: .utf8)!
         let output = try await testSubject.execute(input: testInput1)
-        XCTAssertEqual(output, "SGVsbG8gV29ybGQh")
+        let result = try output.asData()
+        XCTAssertEqual(result, "SGVsbG8gV29ybGQh".data(using: .utf8)!)
     }
 
     func testRFCValues() async throws {
@@ -65,7 +66,8 @@ final class ToBase64OperationTests: XCTestCase {
 
         for (input, expectedValue) in inputs {
             let output = try await testSubject.execute(input: input)
-            XCTAssertEqual(output, expectedValue)
+            let result = try output.asData()
+            XCTAssertEqual(result, expectedValue.data(using: .utf8)!)
         }
 
     }

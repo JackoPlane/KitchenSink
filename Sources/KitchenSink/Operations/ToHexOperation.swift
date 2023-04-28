@@ -25,29 +25,40 @@
 import Foundation
 
 /// To Hex operation
-final public class ToHexOperation: Operation<Data, String> {
+final public class ToHexOperation: Operation {
 
-    // MARK: - Initializer
+    // MARK: - Metadata
 
-    convenience init() {
-        self.init(
-            name: "To Hex",
-            description: "Converts the input string to hexadecimal bytes separated by the specified delimiter.\n\ne.g. The UTF-8 encoded string `Γειά σου` becomes `ce 93 ce b5 ce b9 ce ac 20 cf 83 ce bf cf 85 0a`", // swiftlint:disable:this line_length
-            infoUrl: URL(string: "https://wikipedia.org/wiki/Hexadecimal")
-        )
+    public override var name: String {
+        "To Hex"
+    }
+
+    public override var description: String {
+        // swiftlint:disable:next line_length
+        "Converts the input string to hexadecimal bytes separated by the specified delimiter.\n\ne.g. The UTF-8 encoded string `Γειά σου` becomes `ce 93 ce b5 ce b9 ce ac 20 cf 83 ce bf cf 85 0a"
+    }
+
+    public override var infoUrl: URL? {
+        URL(string: "https://wikipedia.org/wiki/Hexadecimal")
     }
 
     // MARK: - Execution
 
-    public override func execute(input: Data) async throws -> String {
+    public override func execute(input: Data) async throws -> ConvertibleIntoData {
         // Once we  have support for passing ingredients, I'd like
         // to support a wider range of delimiters
         let delimiter = " "
         let separator = "" // Will be used when using 0x with comma formatting
 
-        let hexString = input.map { String(format:"%02x\(delimiter)", $0) }.joined(separator: separator)
+        let hexString = input.map { String(format: "%02x\(delimiter)", $0) }.joined(separator: separator)
 
         return String(hexString.dropLast(delimiter.count))
+    }
+
+    // MARK: - Rendering
+
+    public override func prepareForPresentation(_ input: Data) -> Renderable {
+        .string(String(data: input, encoding: .utf8)!)
     }
 
 }

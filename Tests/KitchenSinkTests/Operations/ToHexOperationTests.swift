@@ -49,7 +49,8 @@ final class ToHexOperationTests: XCTestCase {
     func testBasicOperations() async throws {
         let testInput1 = "Hello World!".data(using: .utf8)!
         let output = try await testSubject.execute(input: testInput1)
-        XCTAssertEqual(output, "48 65 6c 6c 6f 20 57 6f 72 6c 64 21")
+        let result = try output.asData()
+        XCTAssertEqual(result, "48 65 6c 6c 6f 20 57 6f 72 6c 64 21".data(using: .utf8)!)
     }
 
     func testNaughtyStringValues() async throws {
@@ -64,7 +65,8 @@ final class ToHexOperationTests: XCTestCase {
 
         for (input, expectedValue) in inputs {
             let output = try await testSubject.execute(input: input)
-            XCTAssertEqual(output, expectedValue)
+            let result = try output.asData()
+            XCTAssertEqual(result, expectedValue.data(using: .utf8)!)
         }
 
     }

@@ -27,12 +27,6 @@ import Foundation
 /// Operation interface
 public protocol OperationInterface {
 
-    ///  Type of expected input
-    associatedtype Input
-
-    /// Type of output data
-    associatedtype Output
-
     // MARK: - Properties
 
     /// Operation name
@@ -49,40 +43,60 @@ public protocol OperationInterface {
     /// Operation execution
     /// - Parameter input: Input data
     /// - Returns: Processed output
-    func execute(input: Input) async throws -> Output
+    func execute(input: Data) async throws -> ConvertibleIntoData
 
 }
 
 /// Operation
-open class Operation<Input, Output>: OperationInterface {
+open class Operation: OperationInterface, Presentable {
 
     // MARK: - Properties
 
-    public let name: String
-    public let infoUrl: URL?
-    public let description: String
-
     /// Disabled status
-    internal var disabled: Bool = false
+    open var disabled: Bool = false
 
     /// Flow control
-    internal var flowControl: Bool = false
+    open var flowControl: Bool = false
 
     /// Breakpoint
-    internal var breakpoint: Bool = false
+    open var breakpoint: Bool = false
 
-    // MARK: - Initializer
+    // MARK: - OperationInterface
 
-    internal init(name: String, description: String, infoUrl: URL? = nil) {
-        self.name = name
-        self.description = description
-        self.infoUrl = infoUrl
+    public var name: String {
+        fatalError("Subclass must override: \(#function)", file: #file, line: #line)
+    }
+
+    public var infoUrl: URL? {
+        nil
+    }
+
+    public var description: String {
+        fatalError("Subclass must override: \(#function)", file: #file, line: #line)
     }
 
     // MARK: - Execution
 
-    open func execute(input: Input) async throws -> Output {
+    public func execute(input: Data) async throws -> ConvertibleIntoData {
         fatalError("Subclass must override: \(#function)", file: #file, line: #line)
     }
+
+    // MARK: - Presentable
+
+    public func prepareForPresentation(_ input: Data) -> Renderable {
+        fatalError("Subclass must override: \(#function)", file: #file, line: #line)
+    }
+
+}
+
+public protocol Presentable {
+
+    func prepareForPresentation(_ input: Data) -> Renderable
+
+}
+
+public enum Renderable {
+
+    case string(_ value: String)
 
 }

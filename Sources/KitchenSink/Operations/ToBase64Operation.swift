@@ -25,22 +25,33 @@
 import Foundation
 
 /// To Base64 operation
-final public class ToBase64Operation: Operation<Data, String> {
+final public class ToBase64Operation: Operation {
 
-    // MARK: - Initializer
+    // MARK: - Metadata
 
-    convenience init() {
-        self.init(
-            name: "To Base64",
-            description: "Base64 is a notation for encoding arbitrary byte data using a restricted set of symbols that can be conveniently used by humans and processed by computers.\n\nThis operation encodes raw data into an ASCII Base64 string.\n\ne.g. `hello` becomes `aGVsbG8=`", // swiftlint:disable:this line_length
-            infoUrl: URL(string: "https://wikipedia.org/wiki/Base64")
-        )
+    public override var name: String {
+        "To Base64"
+    }
+
+    public override var description: String {
+        // swiftlint:disable:next line_length
+        "Base64 is a notation for encoding arbitrary byte data using a restricted set of symbols that can be conveniently used by humans and processed by computers.\n\nThis operation encodes raw data into an ASCII Base64 string.\n\ne.g. `hello` becomes `aGVsbG8=`"
+    }
+
+    public override var infoUrl: URL? {
+        URL(string: "https://wikipedia.org/wiki/Base64")
     }
 
     // MARK: - Execution
 
-    public override func execute(input: Data) async throws -> String {
-        input.base64EncodedString()
+    public override func execute(input: Data) async throws -> ConvertibleIntoData {
+        return input.base64EncodedString()
+    }
+
+    // MARK: - Rendering
+
+    public override func prepareForPresentation(_ input: Data) -> Renderable {
+        .string(String(data: input, encoding: .utf8)!)
     }
 
 }

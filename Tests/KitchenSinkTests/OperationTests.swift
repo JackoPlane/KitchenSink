@@ -27,9 +27,11 @@ import Foundation
 
 extension KitchenSink.Operation {
 
-    static func mock(name: String = "Test", description: String = "Testing") -> KitchenSink.Operation<Any, Any> {
-        let mocked = KitchenSink.Operation<Any, Any>(name: "", description: description, infoUrl: nil)
-        return mocked
+    static func mock() -> KitchenSink.Operation {
+        .init()
+
+//        let mocked = KitchenSink.Operation(name: "", description: description, infoUrl: nil)
+//        return mocked
     }
 
 }
